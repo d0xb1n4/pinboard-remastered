@@ -1,0 +1,34 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="pins">
+    {% for pin in pins %}
+        <span class="pin" id="{{ pin.id }}">
+            <span class="img">
+                <img src="{{ pin.image.url }}">
+            </span>
+            <span class="opacity">
+                <span style="position:absolute; margin-left: 15px; margin-top: 20px;">
+                    {% if pin.owner == request.user %}
+                    <button id="likes{{ pin.id }}" onclick="LikeCheck('{{ request.user.username }}', {{ pin.id }}, true);">🤍</button>
+                    <button onclick="PinAddToBoardHtml('{{ request.user.username }}', {{ pin.id }});" id="save">Сохранить</button>
+                    {% endif %}
+                </span>
+                <span style="margin-left: 15px; position:absolute; margin-top: 200px;">
+                    {% if pin.owner == request.user %}
+                        <button onclick="DeletePin({{ pin.id }});" id="delete" style="width: 160px;">Удалить</button>
+                        <br><br>
+                    {% else %}
+                        <br><br><br>
+                    {% endif %}
+                    <a href="{% url 'pin_view' pin.id %}">
+                        <button id="open" style="width: 160px;">Открыть</button>
+                    </a>
+                </span>
+            </span>
+            <span class="dark"></span>
+        </span>
+    {% endfor %}
+</div>
+{% endblock %}

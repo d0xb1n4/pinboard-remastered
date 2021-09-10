@@ -1,0 +1,77 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+<script src="{% static 'js.index.js' %}"></script>
+<script>
+    LikeCheck('{{ request.user.username }}', {{ pin.id }});
+</script>
+<div class="pin-builder">
+
+    <div>
+        <img class="preview" src="{{ pin.image.url }}"/>
+    </div>
+
+    <div style="padding: 15px;">
+        <script>
+            let menu = true
+            function Menu() {
+                if (menu === false) {
+                    menu = true
+                    document.getElementById('menu').style.display = 'none'
+                }
+                else {
+                    menu = false
+                    document.getElementById('menu').style.display = 'block'
+                }
+            }
+        </script>
+        <br>
+        {% if user.is_authenticated %}
+            <div>
+                <a href="/pin/{{ pin.id }}/">
+                    <button style="width: 60px;">⬅</button>
+                </a>
+                <button onclick="LikeCheck('{{ request.user.username }}', {{ pin.id }}, true);" id="likes">🤍 0</button>
+                <button><span style="color: gray;">👁</span> {{ pin.views }}</button>
+                <button>💬 {{ comments|length }}</button>
+                <button>⭐</button>
+            </div>
+        {% endif %}
+        <br>
+        <div class="form">
+            <input id="comment-text" placeholder="Ваш комментарий...">
+            <button onclick="CreateComment('{{ request.user.username }}', {{ pin.id }});" style="border-radius: 10px; width: 100px;"><img width="10px;" src="{% static 'img/send.png' %}"></button>
+        </div>
+
+        <div class="comments" id="comments" style="margin-top: 15px;">
+            {% if comments %}
+                {% for comment in comments %}
+                    <div class="comment" id="{{ comment.id }}">
+                        <div class="owner">
+                            {% if comment.owner.avatar %}
+                                <img width="30px;" height="30px" src="{{ comment.owner.avatar.url }}">
+                            {% else %}
+                                <img width="30px;" height="30px" src="{% static 'img/user.png' %}">
+                            {% endif %}
+                             <a style="color: rgb(50, 50, 50)" href="{% url 'account' comment.owner.username %}">
+                                 <h2 style="margin-left: 40px;">{{ comment.owner.full_name }}</h2>
+                             </a>
+                        </div>
+                        <div class="text" style="word-break: break-word;">
+                            <h2>{{ comment.text }}</h2>
+                            <p>{{ comment.date_of_creation }}</p>
+                            <button onclick="DeleteComment({{ comment.id }});" style="font-size: 15px; margin-top: -10px;">удалить 🗑</button>
+                        </div>
+                    </div>
+                    <br>
+                {% endfor %}
+            {% else %}
+                <center>
+                    <h1 style="font-weight: lighter;">Комментариев пока нет</h1>
+                </center>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,190 @@
+{% extends 'index.html' %}
+{% load static %}
+{% block content %}
+<link href="{% static 'css/index.css' %}" rel="stylesheet" type="text/css">
+<script src="{% static 'js/index.js' %}"></script>
+
+<div id="profile">
+    {% if user == request.user %}
+    <a href="#" onclick="EditProfileHtml();" style="margin-left: 10px;">
+        <img width="40px;" src="{% static 'img/account_edit.png' %}">
+    </a>
+    <a onclick="Menu();" style="margin-left: 10px; cursor:pointer;">
+        <img width="40px;" src="{% static 'img/plus.png' %}">
+    </a>
+    <div id="menu" style="display: none; position:absolute;">
+        <a href="{% url 'pin_builder' %}">
+            <button>Создать пин</button>
+        </a>
+        <br><br>
+        <a href="{% url 'board_builder' %}">
+            <button>Создать доску</button>
+        </a>
+    </div>
+    <script>
+        let menu = true
+
+        function Menu() {
+            if (menu === false) {
+                menu = true
+                document.getElementById('menu').style.display = 'none'
+            } else {
+                menu = false
+                document.getElementById('menu').style.display = 'block'
+            }
+        }
+    </script>
+    {% else %}
+    <br><br><br>
+    {% endif %}
+    <center>
+        {% if user.cap %}
+        <img class="cap"
+             src="{{ user.cap.url }}">
+        {% else %}
+
+        <br><br><br>
+        {% endif %}
+        <br>
+        {% if user.avatar %}
+        <img class="avatar" src="{{ user.avatar.url }}">
+        {% else %}
+        <img class="avatar" src="{% static 'img/no-photo.png' %}">
+        {% endif %}
+
+        <div class="profile" style="word-wrap: break-word; background: white;">
+            <h1 class="username">{{ user.full_name }}</h1><br>
+            {% if user == request.user %}
+            <h2 class="email">{{ user.email }}</h2><br>
+            {% endif %}
+            <h2 class="description">{{ user.description }}</h2>
+
+            {% if request.user.is_authenticated %}
+                <center>
+                    <button id="subscribers">{{ user.subscribers.count }}</button>
+
+                    <button id="subscribe-button" onclick="Subscribe('{{ request.user.username }}', '{{ user.username }}');">
+                        {% if subscribe %}
+                        Отписаться
+                        {% else %}
+                        Подписаться
+                        {% endif %}
+                    </button>
+
+                </center>
+            {% endif %}
+        </div>
+    </center>
+    {% if user == request.user %}
+    {% if boards %}
+        <center>
+            <h1 style="font-weight: lighter;">Ваши доски</h1>
+        </center>
+        <div class="pins">
+
+        {% for board in boards %}
+            <span class="pin" id="{{ board.id }}">
+                <span class="img">
+                    <img src="{{ board.cover.url }}">
+                </span>
+                <span class="opacity">
+                    <span style="margin-left: 25px; position:absolute; margin-top: 200px;">
+                        <button onclick="DeleteBoard({{ board.id }});" id="delete" style="width: 160px;">Удалить</button>
+                        <br><br>
+                        <a href="{% url 'board_view' board.id %}">
+                            <button id="open" style="width: 160px;">Открыть</button>
+                        </a>
+                    </span>
+                </span>
+            </span>
+        {% endfor %}
+        </div>
+        {% endif %}
+        {% if pins %}
+        <center>
+            <h1 style="font-weight: lighter;">Ваши пины</h1>
+        </center>
+        {% endif %}
+        <div class="pins">
+        {% for pin in pins %}
+            <span class="pin" id="{{ pin.id }}">
+            <span class="img">
+                <img src="{{ pin.image.url }}">
+            </span>
+            <span class="opacity">
+                <span style="position:absolute; margin-left: 15px; margin-top: 20px;">
+                    <button id="likes{{ pin.id }}" onclick="LikeCheck('{{ request.user.username }}', {{ pin.id }}, true);">🤍</button>
+                    <button onclick="PinAddToBoardHtml('{{ request.user.username }}', {{ pin.id }});" id="save">Сохранить</button>
+                </span>
+                <span style="margin-left: 15px; position:absolute; margin-top: 200px;">
+                    <button onclick="DeletePin({{ pin.id }});" id="delete" style="width: 160px;">Удалить</button>
+                    <br><br>
+                    <a href="{% url 'pin_view' pin.id %}">
+                        <button id="open" style="width: 160px;">Открыть</button>
+                    </a>
+                </span>
+            </span>
+            <span class="dark"></span>
+        </span>
+        {% endfor %}
+        </div>
+    {% endif %}
+</div>
+<div class="profile-edit" id="profile-edit">
+    <a href="#">
+        <img width="40px;" src="{% static 'img/back.png' %}" onclick="CloseEditProfileHtml();">
+    </a>
+    <a href="#">
+        <img width="40px;" src="{% static 'img/sign.png' %}" onclick="SignOut();">
+    </a>
+    <a href="{% url 'api_docs' %}">
+        <img width="40px;" src="{% static 'img/api.png' %}">
+    </a>
+    <center>
+        <h1>Основные настройки</h1>
+    </center>
+
+    <div class="settings" style="width: 250px;">
+        <h2>Аватар</h2>
+        <input id="avatar" width="200px;" type="file">
+        <h2>Шапка</h2>
+        <input id="cap" width="200px;" type="file">
+        <br><br>
+        <button onclick="DeleteCapAndAvatar({{ request.user.id }});">Удалить шапку и аватар</button>
+
+        <h2>Имя пользователя</h2>
+        <input maxlength="40" id="full_name" value="{{ request.user.full_name }}" placeholder="Ваш ник" width="200px;">
+        <h2>Описание</h2>
+        <input maxlength="40" id="description" value="{{ request.user.description }}" placeholder="Чем вы занимаетесь?"
+               width="200px;">
+        <h2>ID</h2>
+        <input disabled id="username" value="{{ request.user.username }}" placeholder="Ваш ID на сайте" width="200px;">
+        <h2>Двухфакторная аутентификация</h2>
+        <input style="margin-top: -15px;" type="checkbox" id="two_factor"/>
+        <label for="two_factor">Toggle</label>
+        <br>
+    </div>
+    <center>
+        <button onclick="EditProfile({{ request.user.id }});">
+            сохранить настройки
+        </button>
+    </center>
+<br><br>
+    <center>
+        <h1>Сброс и смена пароля</h1>
+    </center>
+    <div class="settings" style="width: 250px;">
+        <h2>Текущий пароль</h2>
+        <input maxlength="40" id="password"placeholder="?" width="200px;">
+        <h2>Новый пароль</h2>
+        <input maxlength="40" id="password1" placeholder="?"
+               width="200px;">
+    </div><br>
+    <center>
+        <button onclick="NewPassword({{ request.user.id }});">
+            Сохранить пароль
+        </button>
+    </center>
+</div>
+
+{% endblock %}

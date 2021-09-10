@@ -1,0 +1,50 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<link href="{% static 'css/index.css' %}" rel="stylesheet" type="text/css">
+<script src="{% static 'js/index.js' %}"></script>
+
+<a href="{% url 'account' request.user.username %}">
+    <img width="40px;" src="{% static 'img/back.png' %}">
+</a>
+<div class="pin-builder">
+
+    <div>
+        <img class="preview" id="output"/><br>
+        <h2 id="img-text" style="margin-left: 80px; position:absolute; margin-top: -200px;">Тут будет обложка доски</h2>
+    </div>
+
+    <div style="padding: 10px;">
+        <label style="width: 175px;" for="file-upload" class="custom-file-upload">
+            <img style="margin-top: -4px; position:absolute;" width="30px;" src="{% static 'img/plus.png' %}">
+            <span style="margin-left: 40px;">Загрузить обложку</span>
+        </label>
+        <button onclick="location.reload();">Удалить обложку</button>
+        <input id="file-upload" type="file" accept="image/*" onchange="loadFile(event)">
+
+        <br><br>
+
+        <input id="name" style="width: calc(100% - 15px);" placeholder="Название...">
+
+        <br><br>
+
+        <center>
+            <button onclick="CreateBoard('{{ request.user.username }}');">Опубликовать</button>
+        </center>
+
+        <script>
+            var loadFile = function (event) {
+                var output = document.getElementById('output');
+                output.src = URL.createObjectURL(event.target.files[0]);
+                output.onload = function () {
+                    URL.revokeObjectURL(output.src) // free memory
+                }
+                document.getElementById('img-text').remove()
+                console.log(output.src)
+            };
+        </script>
+    </div>
+
+</div>
+{% endblock %}

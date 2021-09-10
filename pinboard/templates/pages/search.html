@@ -1,0 +1,56 @@
+{% extends 'index.html' %}
+
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+<center>
+    <div class="search-input">
+        <h1>Поиск 🔍</h1>
+        <form>
+            <input name="q" id="search" placeholder="Запрос...">
+            <button onclick="CreateComment('{{ request.user.username }}', {{ pin.id }});"
+                    style="border-radius: 10px; width: 100px;"><img width="10px;" src="{% static 'img/send.png' %}">
+            </button>
+        </form>
+    </div>
+
+</center>
+{% if pins %}
+<center>
+    <h1>Результаты поиска:</h1>
+</center>
+<div class="pins">
+    {% for pin in pins %}
+        <span class="pin" id="{{ pin.id }}">
+            <span class="img">
+                <img src="{{ pin.image.url }}">
+            </span>
+            <span class="opacity">
+                <span style="position:absolute; margin-left: 15px; margin-top: 20px;">
+                    {% if pin.owner == request.user %}
+                    <button id="likes{{ pin.id }}" onclick="LikeCheck('{{ request.user.username }}', {{ pin.id }}, true);">🤍</button>
+                    <button onclick="CreateBookmark('{{ request.user.username }}', {{ pin.id }});" id="save">Сохранить</button>
+                    {% endif %}
+                </span>
+                <span style="margin-left: 15px; position:absolute; margin-top: 200px;">
+                    {% if pin.owner == request.user %}
+                        <button onclick="DeletePin({{ pin.id }});" id="delete" style="width: 160px;">Удалить</button>
+                        <br><br>
+                    {% else %}
+                        <br><br><br>
+                    {% endif %}
+                    <a href="{% url 'pin_view' pin.id %}">
+                        <button id="open" style="width: 160px;">Открыть</button>
+                    </a>
+                </span>
+            </span>
+            <span class="dark"></span>
+        </span>
+    {% endfor %}
+    </div>
+{% else %}
+<center>
+    <h1>🤔 Ничего не найдено</h1>
+</center>
+{% endif %}
+{% endblock %}

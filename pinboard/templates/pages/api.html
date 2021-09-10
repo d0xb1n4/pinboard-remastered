@@ -1,0 +1,57 @@
+{% extends 'index.html' %}
+{% load static %}
+{% block content %}
+<link href="{% static 'css/index.css' %}" rel="stylesheet" type="text/css">
+<script src="{% static 'js/index.js' %}"></script>
+<center>
+    <h1>Начало работы с api</h1>
+</center>
+
+<div class="api">
+    <p>Ссылка для работы с API: <span class="red">/api/general/</span></p>
+    <p>Пример обращения к API:</p>
+    <a href="http://127.0.0.1:8000/api/general/?method=getPinInfo&pin_id=1">http://127.0.0.1:8000/api/general/?method=getPinInfo&pin_id=1</a>
+    <p>Каждый из методов API обязательно принимает параметр method.</p>
+
+    <center>
+        <h1>Методы</h1>
+        <table width="100%" cellpadding="5">
+            <tr>
+                <th>Название метода</th>
+                <th>Описание</th>
+                <th>Принимает</th>
+            </tr>
+            <tr>
+                <td>getUserInfo</td>
+                <td>Позволяет получить <br>расширенную информацию<br> о пользователе</td>
+                <td>user_id</td>
+            </tr>
+            <tr>
+                <td>getPinInfo</td>
+                <td>Позволяет получить <br>расширенную информацию<br> о пине</td>
+                <td>pin_id</td>
+            </tr>
+            <tr>
+                <td>getPinComments</td>
+                <td>Позволяет получить <br>Комментарии к пину</td>
+                <td>user_id</td>
+            </tr>
+            <tr>
+                <td>getCommentInfo</td>
+                <td>Позволяет получить <br>расширенную информацию<br> о комментарие</td>
+                <td>comment_id</td>
+            </tr>
+            <tr>
+                <td>getUserBoards</td>
+                <td>Позволяет получить <br>доски пользователя<br></td>
+                <td>user_id</td>
+            </tr>
+            <tr>
+                <td>getUserPins</td>
+                <td>Позволяет получить <br>пины пользователя<br></td>
+                <td>user_id</td>
+            </tr>
+        </table>
+    </center>
+</div>
+{% endblock %}

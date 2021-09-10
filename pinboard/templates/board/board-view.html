@@ -1,0 +1,118 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .pin {
+        float: left;
+    }
+
+    .bn {
+        position: absolute; margin-left: 230px; font-size: 50px; font-weight: lighter;
+    }
+
+    @media (max-width: 600px) {
+        .info {
+            display: none;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .pin {
+            float: none;
+        }
+
+        .img img {}
+
+        .bn {
+            position: center;
+            margin-left: 0px;
+
+        }
+    }
+</style>
+<center>
+{% if request.user %}
+        <div style="width: 500px;">
+        <span style="" class="pin" id="{{ pin.id }}">
+            <span class="img">
+                <img src="{{ board.cover.url }}">
+            </span>
+        </span>
+        <h1 class="bn">#{{ board.name }}</h1>
+        <br><br><br><br><br><br><br><br>
+
+        <div class="info">
+            <a style="position: absolute; margin-left: -120px;" href="{% url 'account' request.user.username %}">
+
+                {% if user.avatar %}
+                <img width="30px;" height="30px"
+                     style="float: left; border: 1px solid black; border-radius: 50%; object-fit: cover;"
+                     src="{{ request.user.avatar.url }}">
+                {% else %}
+                <img width="30px;" style="float: left;" src="{% static 'img/user.png' %}">
+                {% endif %}
+                <h2 style="margin-left: 40px; margin-top: 0;">{{ request.user.full_name }}</h2>
+            </a><br><br>
+            <h1 style="position: absolute; margin-left: 230px; font-weight: lighter;">• {% if board.private %} Приватная {% else %} Публичная  {% endif %} доска</h1>
+            <br><br>
+            <h1 style="position: absolute; margin-left: 230px; font-weight: lighter;">• <span id="pins_count">{{ board.pins.count }}</span> пинов</h1>
+        </div>
+    </div>
+    <div class="pins">
+    {% for pin in pins %}
+        <span class="pin" id="{{ pin.id }}">
+            <span class="img">
+                <img src="{{ pin.image.url }}">
+            </span>
+            <span class="opacity">
+                <span style="position:absolute; margin-left: 15px; margin-top: 20px;">
+                    <button id="likes{{ pin.id }}" onclick="LikeCheck('{{ request.user.username }}', {{ pin.id }}, true);">🤍</button>
+                    <button id="save">Сохранить</button>
+                </span>
+                <span style="margin-left: 15px; position:absolute; margin-top: 240px;">
+                    <a href="{% url 'pin_view' pin.id %}">
+                        <button id="open" style="width: 160px;">Открыть</button>
+                    </a>
+                </span>
+            </span>
+            <span class="dark"></span>
+        </span>
+    {% endfor %}
+</div>
+    {% else %}
+    <img width="200px;" src="{% static 'img/password.png' %}"><br>
+    <h1>Это приватная доска.</h1>
+    {% endif %}
+</center>
+<br><br><br><br><br><br><br><br><br>
+<div class="pins">
+    {% for pin in board.pins.all %}
+        <span class="pin" id="{{ pin.id }}">
+            <span class="img">
+                <img src="{{ pin.image.url }}">
+            </span>
+            <span class="opacity">
+                <span style="position:absolute; margin-left: 15px; margin-top: 20px;">
+                    {% if pin.owner == request.user %}
+                    <button id="likes{{ pin.id }}" onclick="LikeCheck('{{ request.user.username }}', {{ pin.id }}, true);">🤍</button>
+                    <button onclick="PinDeleteToBoard({{ pin.id }}, {{ board.id }});" id="save">Удалить</button>
+                    {% endif %}
+                </span>
+                <span style="margin-left: 15px; position:absolute; margin-top: 200px;">
+                    {% if pin.owner == request.user %}
+                        <button onclick="DeletePin({{ pin.id }});" id="delete" style="width: 160px;">Удалить</button>
+                        <br><br>
+                    {% else %}
+                        <br><br><br>
+                    {% endif %}
+                    <a href="{% url 'pin_view' pin.id %}">
+                        <button id="open" style="width: 160px;">Открыть</button>
+                    </a>
+                </span>
+            </span>
+            <span class="dark"></span>
+        </span>
+    {% endfor %}
+</div>
+{% endblock %}

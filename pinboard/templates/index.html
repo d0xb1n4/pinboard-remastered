@@ -1,0 +1,139 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="{% static 'css/index.css' %}" rel="stylesheet" type="text/css">
+    <script src="{% static 'js/index.js' %}"></script>
+    <title>Document</title>
+</head>
+<body>
+<div class="header">
+    <div class="logo">
+        <a href="{% url 'main' %}">
+            <img src="{% static 'img/logo.png' %}">
+        </a>
+    </div>
+    <div class="search">
+        <form action="/search/">
+            <input name="q" placeholder="Поиск..." type="search" required>
+            <button>
+                Искать
+            </button>
+        </form>
+    </div>
+    {% if request.user.is_authenticated %}
+    <div class="navbar">
+        <a href="{% url 'search' %}" class="srh">
+            <img width="30px;" src="{% static 'img/search.png' %}">
+        </a>
+        <a href="{% url 'account' request.user.username %}">
+            {% if user.avatar %}
+                <img width="30px;" height="30px" style="border: 1px solid black; border-radius: 50%; object-fit: cover;" src="{{ user.avatar.url }}">
+            {% else %}
+                <img width="30px;" src="{% static 'img/user.png' %}">
+            {% endif %}
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<div id="content">
+    {% if request.user.code and request.user.code != '0' %}
+    <div id="code" class="code">
+        <center>
+            <img width="60px;" src="{% static 'img/password.png' %}">
+            <br>
+            <h1>Подтвердите код</h1>
+
+            <p>Он отправлен на вашу почту.</p>
+            <input type="number" id="code-input" placeholder="Код">
+            <br><br><br>
+            <button onclick="CheckAuthCode('{{ request.user.username }}');">Зарегистрироваться</button>
+            <br><br>
+            <a href="#" onclick="SignOut();">
+                назад
+            </a>
+        </center>
+    </div>
+    {% else %}
+        {% block content %}
+
+        {% endblock %}
+    {% endif %}
+</div>
+
+<div id="add-pin-to-board" style="display: none;">
+    <a href="#" onclick="PinAddToBoardClose();" style="margin-left: 10px;">
+        <img width="40px;" src="{% static 'img/back.png' %}">
+    </a>
+    <center>
+        <h1>Выберите доску:</h1>
+        <select id="boards-addpin">
+        </select>
+        <button onclick="PinAddToBoard();">Сохранить</button>
+    </center>
+</div>
+
+{% if not request.user.is_authenticated %}
+{% if not request.user.code and request.user.code != '0' %}
+<div onclick="SignInHtml();" class="sign-in-footer">
+    <center>
+        <div class="block">
+            <img src="{% static 'img/sign.png' %}">
+            <h1>Войти</h1>
+        </div>
+    </center>
+</div>
+<div id="sign" class="sign">
+    <a href="#">
+        <img onclick="CloseSignHtml();" src="{% static 'img/back.png' %}" width="30px;">
+    </a>
+    <div id="in" class="in">
+        <center>
+            <img src="{% static 'img/user.png' %}">
+            <br>
+            <h1>Вход в аккаунт</h1>
+            <br>
+            <input placeholder="Эл. почта" id="signin-email">
+            <br><br><br>
+            <input placeholder="Пароль" type="password" id="signin-password">
+            <br><br><br>
+            <button onclick="SignIn();">Авторизоваться</button>
+            <br><br>
+            <a href="#" onclick="SignUpHtml();">
+                регистрация
+            </a>
+        </center>
+    </div>
+    <div id="up" class="up">
+        <center>
+            <img src="{% static 'img/user.png' %}">
+            <br>
+            <h1>Регистрация</h1>
+            <br>
+            <input placeholder="Ник или ваше имя" maxlength="20" id="signup-fullname">
+            <br><br><br>
+            <input placeholder="Эл. почта" id="signup-email">
+            <br><br><br>
+            <input placeholder="Пароль" type="password" id="signup-password">
+            <br><br><br>
+            <input placeholder="Пароль (повторно)" type="password" id="signup-password1">
+            <br><br><br>
+            <button onclick="SignUp()">далее</button>
+            <br><br>
+            <a href="#" onclick="SignInHtml();">
+                авторизация
+            </a>
+        </center>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+
+</body>
+</html>

@@ -1,0 +1,626 @@
+* {
+    font-family: monospace;
+    outline: none;
+    text-decoration: none;
+    transition: 0.5s;
+}
+
+input[type=checkbox] {
+    cursor: pointer;
+    width: 40px;
+}
+
+label {
+    font-weight: bolder;
+    font-size: 20px;
+}
+
+a {
+    font-size: 15px;
+    font-family: monospace;
+    font-weight: lighter;
+    color: rgb(150, 150, 150);
+}
+
+a:hover {
+    color: rgb(50, 50, 50);
+}
+
+body {
+    margin-top: 80px;
+}
+
+.sign, .up {
+    display: none;
+}
+
+.sign input {
+    padding: 10px;
+}
+
+.sign .code {
+    display: none;
+}
+
+input {
+    border-radius: 10px;
+    background: white;
+    border: 2px solid rgb(170, 170, 170);
+    padding: 5px;
+    font-size: 20px;
+    color: rgb(100, 100, 100);
+}
+
+textarea {
+    border-radius: 10px;
+    background: white;
+    border: 2px solid rgb(170, 170, 170);
+    padding: 5px;
+    font-size: 20px;
+    color: rgb(100, 100, 100);
+    min-height: 100px;
+    resize: none;
+}
+
+.button-block {
+    border-radius: 10px;
+    background: white;
+    border: 2px solid rgb(170, 170, 170);
+    padding: 5px;
+    font-size: 20px;
+    color: rgb(100, 100, 100);
+}
+
+select {
+    border-radius: 10px;
+    background: white;
+    border: 2px solid rgb(170, 170, 170);
+    padding: 5px;
+    font-size: 20px;
+    color: rgb(100, 100, 100);
+    cursor: pointer;
+}
+
+
+table {
+    border: 2px solid rgb(230, 230, 230);
+    font-size: 17px;
+    width: 800px;
+}
+
+tr {
+    border: 2px solid rgb(230, 230, 230);
+}
+
+th {
+    border: 2px solid rgb(230, 230, 230);
+    padding: 10px;
+}
+
+td {
+    padding: 10px;
+    border: 2px solid rgb(230, 230, 230);
+}
+
+button {
+    border-radius: 10px;
+    background: white;
+    border: 2px solid rgb(170, 170, 170);
+    padding: 5px;
+    font-size: 20px;
+    color: rgb(100, 100, 100);
+}
+
+button:hover {
+    color: rgb(50, 50, 50);
+    border: 2px solid rgb(50, 50, 50);
+    cursor: pointer;
+}
+
+.sign-in-footer {
+    position: fixed;
+    background: #ec7158;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 45px;
+    cursor: pointer;
+    opacity: 90%;
+}
+
+.sign-in-footer .block {
+    display: flex;
+    margin-left: calc(50% - 70px);
+}
+
+.sign-in-footer .block h1 {
+    margin-left: 20px;
+    margin-top: 10px;
+    color: white;
+}
+
+.sign-in-footer img {
+    width: 30px;
+    height: 30px;
+    margin-top: 10px;
+}
+
+
+.header {
+    position: fixed;
+    background: rgb(240, 240, 240);
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+}
+
+.header .logo img {
+    width: 200px;
+}
+
+.header .search input {
+    margin-top: 15px;
+    width: 400px;
+}
+
+.header .search img {
+    margin-top: 15px;
+    margin-left: 10px;
+    position: absolute;
+    width: 30px;
+    border-radius: 50px;
+    height: 30px;
+    border: 1px solid black;
+    padding: 3px;
+}
+
+.header .navbar {
+    right: 20px;
+    top: 20px;
+    position: absolute;
+}
+
+/* CSS */
+
+.toasts {
+    margin: 80px;
+    right: 0;
+}
+
+.toast {
+    margin-left: 40px;
+    z-index: 999999;
+    overflow: hidden;
+    font-size: 0.875rem;
+    background-color: rgb(255, 255, 255);
+    background-clip: padding-box;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.25rem;
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+    display: none;
+    padding: 0.75rem 2rem 0.75rem 0.75rem;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.toast__close {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    padding: 0;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+    float: right;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    opacity: 0.6;
+    margin: 0;
+    font-family: inherit;
+    border-radius: 0;
+}
+
+.toast_show {
+    display: block;
+}
+
+
+.cap {
+    width: 650px;
+    height: 400px;
+    border-radius: 50px;
+    z-index: 0;
+    object-fit: cover;
+}
+
+.avatar {
+    width: 200px;
+    height: 200px;
+    background: white;
+    margin-top: -100px;
+    border-radius: 50%;
+    border: 1px solid black;
+    object-fit: cover;
+}
+
+.profile {
+    border: 2px solid rgb(230, 230, 230);
+    max-width: 498px;
+    padding: 10px;
+    border-radius: 50px;
+    min-height: 100px;
+}
+
+.profile-edit {
+    display: none;
+}
+
+.description {
+    color: rgb(100, 100, 100);
+    font-weight: lighter;
+}
+
+.email {
+    color: rgb(100, 100, 100);
+    font-weight: lighter;
+}
+
+
+.profile-edit input[type=checkbox] {
+    height: 0;
+    width: 0;
+    visibility: hidden;
+}
+
+.profile-edit label {
+    margin-top: -6px;
+    cursor: pointer;
+    text-indent: -9999px;
+    width: 80px;
+    height: 40px;
+    background: grey;
+    display: block;
+    border-radius: 100px;
+    position: relative;
+}
+
+.profile-edit label:after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 30px;
+    height: 30px;
+    background: #fff;
+    border-radius: 90px;
+    transition: 0.3s;
+}
+
+.profile-edit input:checked + label {
+    background: #bada55;
+}
+
+.profile-edit input:checked + label:after {
+    left: calc(100% - 5px);
+    transform: translateX(-100%);
+}
+
+.profile-edit label:active:after {
+    width: 130px;
+}
+
+.settings {
+    margin-left: calc(50% - 200px);
+}
+
+.sub {
+    display: flex;
+    margin-left: calc(50% - 140px);
+}
+
+.subscribers {
+    border-radius: 50px 0 0 50px;
+    margin-right: 20px;
+    background: white;
+    border: 2px solid rgb(50, 50, 50);
+    width: 120px;
+    height: 38px;
+    font-size: 15px;
+    text-align: center;
+    color: rgb(150, 150, 150);
+    line-height: 0;
+    margin-left: 15px;
+}
+
+.red {
+    border-radius: 0 50px 50px 0;
+}
+
+.red:hover {
+    background: rgb(255, 130, 130);
+    color: white;
+    border: 2px solid rgb(255, 100, 100);
+}
+
+.preview {
+    width: 100%;
+    min-height: 400px;
+    object-fit: cover;
+    border-radius: 30px 30px 0 0;
+}
+
+/* Скрываем элемент <input type="file" /> */
+.pin-builder input[type="file"] {
+    display: none;
+}
+
+/* Собственно стилизируем кнопку в соответствии с нужным внешним видом */
+.pin-builder .custom-file-upload {
+    display: inline-block;
+    cursor: pointer;
+    width: 200px;
+    border-radius: 10px;
+    background: white;
+    border: 2px solid rgb(170, 170, 170);
+    padding: 5px;
+    font-size: 20px;
+    color: rgb(100, 100, 100);
+}
+
+.pin-builder {
+    width: 400px;
+    border: 2px solid rgb(200, 200, 200);
+    margin-left: calc(50% - 200px);
+    border-radius: 30px;
+}
+
+
+.opacity {
+    position: absolute;
+    margin-left: -205px;
+    margin-top: 0;
+    opacity: 0;
+    width: 200px;
+    height: 300px;
+    border-radius: 30px;
+}
+
+.pin img {
+    width: 200px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 30px;
+    border: 1px solid black;
+}
+
+.pin:hover .opacity {
+    opacity: 100%;
+    background-color: rgba(0, 0, 0, .3);
+}
+
+.opacity button {
+    height: 40px;
+}
+
+.opacity #save {
+    background: rgb(255, 130, 130);
+    color: white;
+    border: 2px solid rgb(255, 100, 100);
+}
+
+.opacity #open {
+    background: rgb(130, 130, 255);
+    color: white;
+    border: 2px solid rgb(100, 100, 255);
+}
+
+
+.comments {
+
+}
+
+.comment {
+    background: rgb(230, 230, 230);
+    border-radius: 15px;
+    padding: 3px 1em 10px 1em;
+}
+
+
+.comment .owner img {
+    float: left;
+    border: 1px solid black;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.srh {
+    display: none;
+}
+
+.search-input {
+    display: none;
+}
+
+p {
+    font-size: 20px;
+    font-weight: lighter;
+}
+
+.red {
+    color: rgb(250, 150, 150);
+}
+
+.api {
+    width: 700px;
+    margin-left: calc(50% - 350px);
+}
+
+@media (max-width: 700px) {
+    .api {
+        margin-left: 0;
+        width: 100%;
+    }
+    table {
+        width: 100%;
+    }
+
+    td {
+        padding: 0;
+    }
+    .search-input {
+        display: inline-block;
+    }
+
+    .search {
+        display: none;
+    }
+
+    .srh {
+        display: inline-block;
+    }
+    .opacity {
+        position: absolute;
+        margin-left: -200px;
+        margin-top: 0;
+        opacity: 0;
+        width: 190px;
+        height: 300px;
+        border-radius: 30px;
+    }
+
+    .pin img {
+        width: 190px;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 30px;
+    }
+
+    .pin-builder {
+        width: 100%;
+        border: 1px solid rgb(230, 230, 230);
+        border-radius: 0;
+        margin-left: 0;
+    }
+
+
+    .preview {
+        width: 100%;
+        min-height: 400px;
+        object-fit: cover;
+        border-radius: 0;
+    }
+
+    input {
+        width: 200px;
+        font-size: 20px;
+    }
+
+
+    .sign-in-footer {
+        position: fixed;
+        background: #ec7158;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 45px;
+        cursor: pointer;
+        opacity: 90%;
+    }
+
+    .sign-in-footer .block {
+        display: flex;
+        margin-left: calc(50% - 70px);
+    }
+
+    .sign-in-footer .block h1 {
+        margin-left: 20px;
+        margin-top: 10px;
+        color: white;
+    }
+
+    .sign-in-footer img {
+        width: 30px;
+        height: 30px;
+        margin-top: 10px;
+    }
+
+
+    .header {
+        position: fixed;
+        background: rgb(240, 240, 240);
+        top: 0;
+        left: 0;
+        width: 100%;
+        display: flex;
+        z-index: 999;
+    }
+
+    .header .logo img {
+        width: 200px;
+    }
+
+    .header .search input {
+        display: none;
+    }
+
+    .header .search img {
+        display: none;
+    }
+
+    .header .navbar {
+        right: 20px;
+        top: 20px;
+        position: absolute;
+    }
+
+    .cap {
+        width: 100%;
+        height: 200px;
+        z-index: 0;
+        object-fit: cover;
+        border-radius: 0;
+        left: 0;
+    }
+
+    .avatar {
+        width: 100px;
+        height: 100px;
+        background: white;
+        margin-top: -50px;
+        border-radius: 50%;
+        border: 1px solid black;
+        object-fit: cover;
+    }
+
+    .profile {
+        line-height: 0px;
+        border: 2px solid rgb(230, 230, 230);
+        max-width: 498px;
+        padding: 10px;
+        border-radius: 50px;
+        min-height: 100px;
+    }
+
+    .profile-edit {
+        display: none;
+    }
+
+    .settings {
+        margin-left: calc(50% - 100px);
+    }
+
+    .description {
+        color: rgb(100, 100, 100);
+        font-weight: lighter;
+    }
+
+    .email {
+        color: rgb(100, 100, 100);
+        font-weight: lighter;
+    }
+
+}

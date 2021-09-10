@@ -1,0 +1,134 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+<script src="{% static 'js.index.js' %}"></script>
+<script>
+    LikeCheck('{{ request.user.username }}', {{pin.id}});
+</script>
+<div id="pin-view">
+    <div class="pin-builder">
+
+    <div>
+        <img class="preview" src="{{ pin.image.url }}"/>
+    </div>
+
+    <div style="padding: 15px;">
+        {% if user.is_authenticated %}
+        <img style="cursor:pointer;" onclick="Menu();" id="menu-icon" width="30px;" src="{% static 'img/menu.png' %}">
+        <div id="menu" style="display: none;">
+            {% if pin.owner == request.user %}
+            <button onclick="DeletePin({{ pin.id }});">Удалить запись</button>
+            <br><br>
+            <button onclick="PinEditHtml();">Редактировать запись</button>
+            <br><br>
+            {% endif %}
+            <a href="#">
+                <button onclick="PinAddToBoardHtml('{{ request.user.username }}', {{ pin.id }});" id="save">Сохранить на доску</button>
+            </a>
+        </div>
+        {% endif %}
+        <script>
+            let menu = true
+
+            function Menu() {
+                if (menu === false) {
+                    menu = true
+                    document.getElementById('menu').style.display = 'none'
+                } else {
+                    menu = false
+                    document.getElementById('menu').style.display = 'block'
+                }
+            }
+        </script>
+        {% if pin.sourse %}
+        <br>
+        <a target="_blank" href="{{ pin.sourse }}">{{ pin.sourse|truncatechars:40 }}</a>
+        {% endif %}
+        <p>{{ pin.date_of_creation }}</p>
+
+        <h1>{{ pin.title }}</h1>
+
+        <a href="{% url 'account' pin.owner.username %}">
+            {% if user.avatar %}
+            <img width="30px;" height="30px"
+                 style="float: left; border: 1px solid black; border-radius: 50%; object-fit: cover;"
+                 src="{{ pin.owner.avatar.url }}">
+            {% else %}
+            <img width="30px;" style="float: left;" src="{% static 'img/user.png' %}">
+            {% endif %}
+            <h2 style="margin-left: 40px; margin-top: 10px;">{{ pin.owner.full_name }}</h2>
+        </a>
+
+        <h2>{{ pin.description }}</h2>
+        {% if user.is_authenticated %}
+        <div>
+            <button onclick="LikeCheck('{{ request.user.username }}', {{ pin.id }}, true);" id="likes">🤍 0</button>
+            <button><span style="color: gray;">👁</span> {{ pin.views }}</button>
+            <a href="{% url 'pin_comments' pin.id %}">
+                <button>💬 {{ comments }}</button>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+</div>
+
+<div id="pin-edit" style="display: none">
+    <a onclick="PinViewHtml();">
+        <img width="40px;" src="{% static 'img/back.png' %}">
+    </a>
+    <div class="pin-builder">
+
+        <div>
+            <img class="preview" id="output"/><br>
+            <h2 id="img-text" style="margin-left: 100px; position:absolute; margin-top: -200px;">Тут будет ваше
+                фото</h2>
+        </div>
+
+        <div style="padding: 10px;">
+            <label for="file-upload" class="custom-file-upload">
+                <img style="margin-top: -4px; position:absolute;" width="30px;" src="{% static 'img/plus.png' %}">
+                <span style="margin-left: 40px;">Загрузить фото</span>
+            </label>
+            <button onclick="location.reload();">Удалить фото</button>
+            <input id="file-upload" type="file" accept="image/*" onchange="loadFile(event)">
+
+            <br><br>
+
+            <input id="sourse" style="width: calc(100% - 15px);" value="{{ pin.sourse }}" placeholder="Источник...">
+
+            <br><br>
+
+            <input id="title" style="width: calc(100% - 15px);" value="{{ pin.title }}" placeholder="Заголовок...">
+
+            <br><br>
+
+            <textarea id="description" style="width: calc(100% - 10px);"
+                      placeholder="Описание...">{{ pin.description }}</textarea>
+
+            <br><br>
+
+
+            <center>
+                <button onclick="PinEdit('{{ request.user.username }}', {{ pin.id }});">Опубликовать</button>
+            </center>
+
+            <script>
+                var loadFile = function (event) {
+                    var output = document.getElementById('output');
+                    output.src = URL.createObjectURL(event.target.files[0]);
+                    output.onload = function () {
+                        URL.revokeObjectURL(output.src) // free memory
+                    }
+                    document.getElementById('img-text').remove()
+                    console.log(output.src)
+                };
+            </script>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
