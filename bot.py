@@ -1,8 +1,29 @@
 from pinboard_api import PinboardApi
+import wikipedia
 
-token = 'id0000000002VjbVw9UHqBmJJ5v32JVi'
+wikipedia.set_lang('ru')
+
+token = 'adminQOuWws3617vBOJyHUTJA'
 api = PinboardApi(token)
 
+
+def send_message(text):
+    api.method('sendMessage', text=text)
+
 for event in api.listen():
-    api.method('deleteMessage', message_id=event['data']['id'])
+    print(event)
+    text = event['text'].lower()
+
+    if 'запись' in text:
+        pin = int(text.split()[1])
+
+        print(api.method('sendMessage', pin_id=pin))
+
+    elif 'привет' in text:
+        send_message('И тебе прuвет!')
+
+
+    elif 'удали свои сообщения' in text:
+        for i in range(0, event['id']):
+            print(api.method('deleteMessage', message_id=i))
 
