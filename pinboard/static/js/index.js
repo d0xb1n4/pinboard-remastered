@@ -106,6 +106,14 @@ function success(text) {
 }
 
 
+function primary (text) {
+    Toast.add({
+        text: text,
+        color: '#ebeb00',
+        autohide: true
+    })
+}
+
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -329,7 +337,12 @@ async function SignOut() {
             }
         });
     let res = await response.json()
+
+    localStorage.setItem('open_chat', false)
+
     window.location.href = '/'
+
+
 }
 
 let edit = false
@@ -448,9 +461,9 @@ async function LikeCheck(username, pin_id, set = false) {
             success('Пин добавлен на доску "понравившиеся"')
         }
         try {
-            document.getElementById('likes').innerHTML = '❤'
+            document.getElementById('likes').innerHTML = '❤' + res['data']['likes_count']
         } catch {
-            document.getElementById('likes' + pin_id).innerHTML = '❤'
+            document.getElementById('likes' + pin_id).innerHTML = '❤' + res['data']['likes_count']
         }
     } else {
         if (set === true) {
@@ -458,9 +471,9 @@ async function LikeCheck(username, pin_id, set = false) {
         }
 
         try {
-            document.getElementById('likes').innerHTML = '🤍'
+            document.getElementById('likes').innerHTML = '🤍' + res['data']['likes_count']
         } catch {
-            document.getElementById('likes' + pin_id).innerHTML = '🤍'
+            document.getElementById('likes' + pin_id).innerHTML = '🤍' + res['data']['likes_count']
         }
     }
 }
@@ -634,7 +647,7 @@ async function PinEdit(username, pin_id) {
 async function PinAddToBoardHtml(user_id, pinid) {
     localStorage.setItem('pin_id', pinid);
 
-    let response = await fetch(domain + 'api/general/?method=getUserBoards&user_id=' + user_id)
+    let response = await fetch(domain + 'api/getUserBoards/?user_id=' + user_id)
     let res = await response.json()
 
     if (res['data']['count'] === 0) {
@@ -667,7 +680,6 @@ function PinAddToBoardClose() {
 async function PinAddToBoard(pin_id) {
     var select = document.getElementById("boards-addpin");
     var board_id = select.value;
-    console.log(board_id)
 
 
     let response = await fetch(
@@ -737,3 +749,194 @@ async function NewPassword(user_id) {
         error('Одно из полей пустое.')
     }
 }
+
+
+async function DeleteMessage(message_id) {
+    let response = await fetch(
+        domain + 'api/deleteMessage/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
+                message_id: message_id
+            })
+        });
+    UpdateMessages()
+    primary('Сообщение удалено.')
+}
+
+
+async function UpdateMessages() {
+    let response = await fetch(
+        domain + 'api/updateMessages/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
+            })
+        });
+    let res = await response.json()
+
+    document.getElementById('messages').innerHTML = ''
+
+    for (let i in res['data']['messages']) {
+
+        let delete_msg = ''
+
+        if (parseInt(localStorage.getItem('user_id')) === parseInt(res['data']['messages'][i]['oti'])) {
+            delete_msg = '</span><a onclick="DeleteMessage(' + res['data']['messages'][i]['id'] + ');" style="cursor: pointer; color: red; margin-left: 5px;">удалить</> \n'
+        }
+
+        let pin = ''
+
+        if (res['data']['messages'][i]['pin']) {
+
+            pin = '<span class="pin" id="' + res['data']['messages'][i]['pin']['id'] + '">\n' +
+                '                <span class="img">\n' +
+                '                    <img src="' + res['data']['messages'][i]['pin']['image'] + '">\n' +
+                '                </span>\n' +
+                '                <span class="opacity">\n' +
+                '                    <span style="position:absolute; margin-left: 15px; margin-top: 20px;">\n' +
+                '                    </span>\n' +
+                '                    <span style="margin-left: 15px; position:absolute; margin-top: 200px;">\n' +
+                '                        <a href="/pin/' + res['data']['messages'][i]['pin']['id'] + '">\n' +
+                '                            <button id="open" style="width: 160px; margin-top: 50px;">Открыть</button>\n' +
+                '                        </a>\n' +
+                '                    </span>\n' +
+                '                    </span>\n' +
+                '                    <span class="dark"></span>\n' +
+                '            </span>'
+        }
+
+        let div = document.createElement('div')
+        div.className = 'message'
+        div.id = 'message'
+        div.innerHTML = '<div class="container">\n' +
+            '            <a href="/user/' + res['data']['messages'][i]['owner_id'] + '/">' + res['data']['messages'][i]['owner_full_name'] + '</a>\n' +
+            '            <p>' + res['data']['messages'][i]['text'] + '</p>\n' + pin +
+            '            <span class="time-left">' + res['data']['messages'][i]["date_of_creation"] + delete_msg +
+            '        </div>'
+        document.getElementById('messages').append(div)
+    }
+}
+
+
+async function SendMessage(owner_id, pin_id) {
+    let text = document.getElementById('inp-text').value
+
+    if (pin_id) {
+            let response = await fetch(
+                domain + 'api/sendMessage/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify({
+                        owner_id: owner_id,
+                        text: '',
+                        pin_id: pin_id
+                    })
+                });
+            document.getElementById('inp-text').value = ''
+            primary('Запись отправлена.')
+        }
+
+    if (!text && !pin_id) {
+        error('Введите сообщение.')
+    } else {
+        if (!pin_id) {
+            let response = await fetch(
+                domain + 'api/sendMessage/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify({
+                        owner_id: owner_id,
+                        text: text,
+                    })
+                });
+            document.getElementById('inp-text').value = ''
+            primary('Сообщение отправлено')
+
+            UpdateMessages()
+        }
+    }
+}
+
+let open_chat = false
+
+function OpenChatHtml() {
+    localStorage.setItem('open_chat', true)
+    document.getElementById('chat-window').style.display = 'block'
+    open_chat = true
+
+    UpdateMessages()
+}
+
+function CloseChatHtml() {
+    localStorage.setItem('open_chat', false)
+    document.getElementById('chat-window').style.display = 'none'
+    open_chat = false
+
+}
+
+function SetUserId(user_id) {
+    localStorage.setItem('user_id', user_id)
+}
+
+function CheckOpenChat() {
+    if (localStorage.getItem('open_chat') === 'true') {
+        OpenChatHtml()
+    }
+}
+
+
+function CopyToken() {
+    const str = document.getElementById('token').value;
+    const el = document.createElement('textarea');
+    el.value = str;
+    el.setAttribute('readonly', '');
+    el.style.position = 'absolute';
+    el.style.left = '-9999px';
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    success('Токен скопирован в буфер обмена.')
+}
+
+
+
+async function SetToken(owner_id) {
+    primary('Отправка запроса на сервер...')
+    let response = await fetch(
+        'http://' + document.domain + ':8000/api/setToken/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
+                owner_id: owner_id
+            })
+        });
+
+
+
+    let res = await response.json()
+    document.getElementById('token').value = res['data']['token']
+
+    document.getElementById('copy-token').style.display = 'inline-block'
+
+    primary('Токен дополнительно отправлен на электроную почту.')
+}
+
+setInterval(UpdateMessages, 1000)
+window.onload = CheckOpenChat

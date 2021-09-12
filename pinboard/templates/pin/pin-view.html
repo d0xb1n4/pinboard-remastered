@@ -51,7 +51,7 @@
         <h1>{{ pin.title }}</h1>
 
         <a href="{% url 'account' pin.owner.username %}">
-            {% if user.avatar %}
+            {% if pin.owner.avatar %}
             <img width="30px;" height="30px"
                  style="float: left; border: 1px solid black; border-radius: 50%; object-fit: cover;"
                  src="{{ pin.owner.avatar.url }}">
@@ -64,11 +64,12 @@
         <h2>{{ pin.description }}</h2>
         {% if user.is_authenticated %}
         <div>
-            <button onclick="LikeCheck('{{ request.user.username }}', {{ pin.id }}, true);" id="likes">🤍 0</button>
+            <button onclick="LikeCheck('{{ request.user.username }}', {{ pin.id }}, true);" id="likes">🤍</button>
             <button><span style="color: gray;">👁</span> {{ pin.views }}</button>
             <a href="{% url 'pin_comments' pin.id %}">
                 <button>💬 {{ comments }}</button>
             </a>
+            <button onclick="SendMessage('{{ request.user.username }}', {{ pin.id }});">📤</button>
         </div>
         {% endif %}
     </div>

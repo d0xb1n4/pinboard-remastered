@@ -31,11 +31,15 @@
         <a href="{% url 'search' %}" class="srh">
             <img width="30px;" src="{% static 'img/search.png' %}">
         </a>
+        <a onclick="OpenChatHtml();" style="cursor:pointer;">
+            <img width="30px;" src="{% static 'img/chat.png' %}">
+        </a>
         <a href="{% url 'account' request.user.username %}">
-            {% if user.avatar %}
-                <img width="30px;" height="30px" style="border: 1px solid black; border-radius: 50%; object-fit: cover;" src="{{ user.avatar.url }}">
+            {% if request.user.avatar %}
+            <img width="30px;" height="30px" style="border: 1px solid black; border-radius: 50%; object-fit: cover;"
+                 src="{{ request.user.avatar.url }}">
             {% else %}
-                <img width="30px;" src="{% static 'img/user.png' %}">
+            <img width="30px;" src="{% static 'img/user.png' %}">
             {% endif %}
         </a>
     </div>
@@ -61,10 +65,31 @@
         </center>
     </div>
     {% else %}
-        {% block content %}
+    {% block content %}
 
-        {% endblock %}
+    {% endblock %}
     {% endif %}
+</div>
+
+<div id="chat-window" class="chat-window">
+    <img onclick="CloseChatHtml();" width="30px;" style="position:absolute; z-index: 999; cursor:pointer;"
+         src="{% static 'img/cross.png' %}">
+    <center>
+        <h1 class="user-name">💬</h1>
+    </center>
+    <br><br><br><br>
+    <div class="inp-message">
+        <input id="inp-text" placeholder="Сообщение...">
+        <button onclick="SendMessage('{{ request.user.username }}');">></button>
+    </div>
+    <div id="messages">
+        <h1>Empty chat</h1>
+        </h1>
+        <div class="container">
+            <a href="/user/' + res['data']['messages'][i]['owner_id'] + '/">user</a>
+            <p>text</p>
+            <span class="time-left">11:45</div>
+    </div>
 </div>
 
 <div id="add-pin-to-board" style="display: none;">
@@ -134,6 +159,8 @@
 </div>
 {% endif %}
 {% endif %}
-
+<script>
+    window.onload = SetUserId({{request.user.id}})
+</script>
 </body>
 </html>

@@ -1,2 +1,2 @@
-server_email = 'clashbase72@gmail.com'
-server_password = 'clashofclans'
+server_email = 'gvardia.anonimov@gmail.com'
+server_password = '&anon228Nonimys'

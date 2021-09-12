@@ -459,11 +459,93 @@ p {
     margin-left: calc(50% - 350px);
 }
 
+.container {
+    border: 2px solid #dedede;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+    padding: 2px;
+    margin: 10px 0;
+    margin-left: 10px;
+}
+
+.darker {
+    border-color: #ccc;
+    background-color: #ddd;
+}
+
+.container::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+.time-right {
+    float: right;
+    color: #aaa;
+}
+
+.time-left {
+    float: left;
+    color: #999;
+}
+
+.chat-window {
+    width: 250px;
+    height: 400px;
+    overflow: scroll;
+    border-radius: 15px;
+    border: 2px solid rgb(230, 230, 230);
+    position: fixed;
+    top: 80px;
+    right: 10px;
+    background: white;
+    display: none;
+}
+
+
+.user-name {
+    border-radius: 15px;
+    position: absolute;
+    width: 240px;
+    margin-top: 0;
+    background: white;
+    padding: 5px;
+
+}
+
+.inp-message {
+    margin-left: 10px;
+}
+
+.inp-message input {
+    width: 150px;
+}
+
+.inp-message button {
+    width: 40px;
+    margin-left: 5px;
+}
+
 @media (max-width: 700px) {
+    .chat-window {
+        width: calc(100% - 20px);
+        height: 90%;
+
+    }
+
+    .inp-message input {
+        width: 280px;
+    }
+
+    .inp-message button {
+        width: 50px;
+    }
+
     .api {
         margin-left: 0;
         width: 100%;
     }
+
     table {
         width: 100%;
     }
@@ -471,6 +553,7 @@ p {
     td {
         padding: 0;
     }
+
     .search-input {
         display: inline-block;
     }
@@ -482,6 +565,7 @@ p {
     .srh {
         display: inline-block;
     }
+
     .opacity {
         position: absolute;
         margin-left: -200px;

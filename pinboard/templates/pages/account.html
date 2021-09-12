@@ -60,36 +60,43 @@
             <h2 class="description">{{ user.description }}</h2>
 
             {% if request.user.is_authenticated %}
-                <center>
-                    <button id="subscribers">{{ user.subscribers.count }}</button>
+            <center>
+                <button id="subscribers">{{ user.subscribers.count }}</button>
 
-                    <button id="subscribe-button" onclick="Subscribe('{{ request.user.username }}', '{{ user.username }}');">
-                        {% if subscribe %}
-                        Отписаться
-                        {% else %}
-                        Подписаться
-                        {% endif %}
-                    </button>
+                <button id="subscribe-button"
+                        onclick="Subscribe('{{ request.user.username }}', '{{ user.username }}');">
+                    {% if subscribe %}
+                    Отписаться
+                    {% else %}
+                    Подписаться
+                    {% endif %}
+                </button>
 
-                </center>
+            </center>
             {% endif %}
         </div>
     </center>
-    {% if user == request.user %}
     {% if boards %}
-        <center>
-            <h1 style="font-weight: lighter;">Ваши доски</h1>
-        </center>
-        <div class="pins">
+    <center>
+        {% if user == request.user %}
+        <h1 style="font-weight: lighter;">Ваши доски</h1>
+        {% else %}
+        <h1 style="font-weight: lighter;">Доски пользователя</h1>
+        {% endif %}
+    </center>
+    <div class="pins">
 
         {% for board in boards %}
-            <span class="pin" id="{{ board.id }}">
+        <span class="pin" id="{{ board.id }}">
                 <span class="img">
                     <img src="{{ board.cover.url }}">
                 </span>
                 <span class="opacity">
                     <span style="margin-left: 25px; position:absolute; margin-top: 200px;">
-                        <button onclick="DeleteBoard({{ board.id }});" id="delete" style="width: 160px;">Удалить</button>
+                        {% if user == request.user %}
+                        <button onclick="DeleteBoard({{ board.id }});" id="delete"
+                                style="width: 160px;">Удалить</button>
+                        {% endif %}
                         <br><br>
                         <a href="{% url 'board_view' board.id %}">
                             <button id="open" style="width: 160px;">Открыть</button>
@@ -98,27 +105,41 @@
                 </span>
             </span>
         {% endfor %}
-        </div>
+    </div>
+    {% endif %}
+
+    {% if pins %}
+    <center>
+        {% if user == request.user %}
+        <h1 style="font-weight: lighter;">Ваши пины</h1>
+        {% else %}
+        <h1 style="font-weight: lighter;">Пины пользователя</h1>
         {% endif %}
-        {% if pins %}
-        <center>
-            <h1 style="font-weight: lighter;">Ваши пины</h1>
-        </center>
-        {% endif %}
-        <div class="pins">
+    </center>
+    {% endif %}
+    <div class="pins">
         {% for pin in pins %}
-            <span class="pin" id="{{ pin.id }}">
+        <span class="pin" id="{{ pin.id }}">
             <span class="img">
                 <img src="{{ pin.image.url }}">
             </span>
             <span class="opacity">
                 <span style="position:absolute; margin-left: 15px; margin-top: 20px;">
-                    <button id="likes{{ pin.id }}" onclick="LikeCheck('{{ request.user.username }}', {{ pin.id }}, true);">🤍</button>
-                    <button onclick="PinAddToBoardHtml('{{ request.user.username }}', {{ pin.id }});" id="save">Сохранить</button>
+
+                   {% if request.user.is_authenticated %}
+                         <button id="likes{{ pin.id }}"
+                                 onclick="LikeCheck('{{ request.user.username }}', {{ pin.id }}, true);">🤍</button>
+                        <button onclick="PinAddToBoardHtml('{{ request.user.username }}', {{ pin.id }});" id="save">Сохранить</button>
+                    {% endif %}
+
                 </span>
                 <span style="margin-left: 15px; position:absolute; margin-top: 200px;">
-                    <button onclick="DeletePin({{ pin.id }});" id="delete" style="width: 160px;">Удалить</button>
-                    <br><br>
+                    {% if pin.owner == request.user %}
+                        <button onclick="DeletePin({{ pin.id }});" id="delete" style="width: 160px;">Удалить</button>
+                        <br><br>
+                    {% else %}
+                        <br><br><br>
+                    {% endif %}
                     <a href="{% url 'pin_view' pin.id %}">
                         <button id="open" style="width: 160px;">Открыть</button>
                     </a>
@@ -127,8 +148,7 @@
             <span class="dark"></span>
         </span>
         {% endfor %}
-        </div>
-    {% endif %}
+    </div>
 </div>
 <div class="profile-edit" id="profile-edit">
     <a href="#">
@@ -159,6 +179,8 @@
                width="200px;">
         <h2>ID</h2>
         <input disabled id="username" value="{{ request.user.username }}" placeholder="Ваш ID на сайте" width="200px;">
+        <h2>Почта</h2>
+        <input disabled id="email" value="{{ request.user.email }}" placeholder="" width="200px;">
         <h2>Двухфакторная аутентификация</h2>
         <input style="margin-top: -15px;" type="checkbox" id="two_factor"/>
         <label for="two_factor">Toggle</label>
@@ -169,17 +191,18 @@
             сохранить настройки
         </button>
     </center>
-<br><br>
+    <br><br>
     <center>
         <h1>Сброс и смена пароля</h1>
     </center>
     <div class="settings" style="width: 250px;">
         <h2>Текущий пароль</h2>
-        <input maxlength="40" id="password"placeholder="?" width="200px;">
+        <input maxlength="40" id="password" placeholder="?" width="200px;">
         <h2>Новый пароль</h2>
         <input maxlength="40" id="password1" placeholder="?"
                width="200px;">
-    </div><br>
+    </div>
+    <br>
     <center>
         <button onclick="NewPassword({{ request.user.id }});">
             Сохранить пароль

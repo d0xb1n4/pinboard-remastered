@@ -404,8 +404,6 @@ class DeleteBoard(APIView):
 
 class DeletePin(APIView):
     def post(self, request):
-        print(request.user.id)
-
         if Pin.objects.get(id=request.data['pin_id']):
             pin = Pin.objects.get(id=request.data['pin_id'])
             pin.delete()
@@ -469,7 +467,7 @@ class NewPassword(APIView):
                 'data': {
                     'message': 'Пароль успешно сменён'
                 }
-            })
+            }, status=status.HTTP_200_OK)
 
         else:
             return Response({
@@ -480,207 +478,469 @@ class NewPassword(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
+class UpdateMessages(APIView):
+    def post(self, request):
+        try:
+            messages = []
+            for i in Message.objects.all():
+                if not PinMessage.objects.filter(id=i.id):
+                    messages.append({
+                        'oti': i.owner.id,
+                        'owner_id': i.owner.username,
+                        'owner_full_name': i.owner.full_name,
+                        'date_of_creation': str(i.date_of_creation).split('.')[0][:-3],
+                        'text': i.text,
+                        'id': i.id
+                    })
+                else:
+                    message = PinMessage.objects.get(id=i.id)
+
+                    messages.append({
+                        'oti': i.owner.id,
+                        'owner_id': i.owner.username,
+                        'owner_full_name': i.owner.full_name,
+                        'date_of_creation': str(i.date_of_creation).split('.')[0][:-3],
+                        'text': i.text,
+                        'id': i.id,
+                        'pin': {
+                            'id': message.pin.id,
+                            'image': message.pin.image.url
+                        }
+                    })
+
+            return Response({
+                'status': 'OK',
+                'data': {
+                    'messages': messages[::-1]
+                }
+            }, status=status.HTTP_200_OK)
+        except:
+            return Response({
+                'status': 'ERR',
+                'data': {
+                    'message': 'Неизвестная ошибка'
+                }
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeleteMessage(APIView):
+    def post(self, request):
+        message = Message.objects.get(id=request.data['message_id'])
+        message.delete()
+
+        return Response({
+            'status': 'OK',
+            'data': {
+
+            }
+        }, status=status.HTTP_200_OK)
+
+
+class SendMessage(APIView):
+    def post(self, request):
+        if 'pin_id' in request.data:
+            message = PinMessage()
+            message.text = request.data['text']
+            message.owner = CustomUser.objects.get(username=request.data['owner_id'])
+            message.pin = Pin.objects.get(id=request.data['pin_id'])
+            message.save()
+
+            return Response({
+                'status': 'OK',
+                'data': {
+                    'id': message.id,
+                    'owner_id': message.owner.id,
+                    'text': message.text,
+                    'pin_id': message.pin.id
+                }
+            }, status=status.HTTP_200_OK)
+
+        else:
+            message = Message()
+            message.text = request.data['text']
+            message.owner = CustomUser.objects.get(username=request.data['owner_id'])
+            message.save()
+
+            return Response({
+                'status': 'OK',
+                'data': {
+                    'id': message.id,
+                    'owner_id': message.owner.id,
+                    'text': message.text,
+                }
+            }, status=status.HTTP_200_OK)
+
+
+letters = 'abcdefghijklmnopqrstuvwxyz123456789QWERTYUIOPASDFGHJKLZXCVBNMM'
+
+
+def create_token(user_id):
+    token = str(user_id) + ''.join([random.choice(letters) for i in range(20)])
+    return token
+
+
+class SetToken(APIView):
+    def post(self, request):
+        if 'owner_id' in request.data:
+            owner = CustomUser.objects.get(username=request.data['owner_id'])
+
+            try:
+                owner.API_TOKEN = create_token(request.data['owner_id'])
+                owner.save()
+
+            except:
+                return Response({
+                    'status': 'ERR',
+                    'data': {
+                        'message': 'Ошибка. Пользователь с таким ID не найден.'
+                    }
+                })
+
+            msg = MIMEMultipart()
+            msg['Subject'] = 'API-TOKEN Pinboard 📍'
+            msg.attach(MIMEText(f'{owner.username}, привет 👋\n'
+                                f'Вот твой token: {owner.API_TOKEN}\n\n'
+                                f'Благодарим за использование Pinboard 📍 ❤', 'plain'))
+
+            server = smtplib.SMTP('smtp.gmail.com: 587')
+            server.starttls()
+            server.login(server_email, server_password)
+            server.sendmail(server_email, owner.email, msg.as_string())
+
+            return Response({
+                'status': 'success',
+                'data': {
+                    'token': owner.API_TOKEN
+                }
+            })
+        else:
+            return Response({
+                'status': 'error',
+                'data': {
+                    'message': 'Переданы не все параметры.'
+                }
+            })
+
+
+class GetUserBoards(APIView):
+    def get(self, request):
+        if CustomUser.objects.filter(username=request.GET['user_id']):
+            user = CustomUser.objects.get(username=request.GET['user_id'])
+
+            boards = Board.objects.filter(owner=user)
+            boards_list = []
+
+            for i in boards:
+                boards_list.append(
+                    {
+                        'id': i.id,
+                        'name': i.name
+                    }
+                )
+
+            return Response({
+                'status': 'OK',
+                'data': {
+                    'count': len(boards_list),
+                    'boards': boards_list
+                }
+            })
+        else:
+            return Response({
+                'status': 'ERR',
+                'data': {
+                    'message': 'Объекта не существует.'
+                }
+            })
+
+
 class GeneralApi(APIView):
     def get(self, request):
-        if 'method' in request.GET:
-            method = request.GET['method']
-            if method == 'getUserInfo':
-                if CustomUser.objects.filter(username=request.GET['user_id']):
-                    user = CustomUser.objects.get(username=request.GET['user_id'])
-                    return Response({
-                        'status': 'OK',
-                        'data': {
-                            'id': user.username,
-                            'full_name': user.full_name,
-                            'description': user.description,
-                            'avatar': user.avatar.url if user.avatar.url else 'Фото профиля не установлено',
-                            'cap': user.cap.url if user.cap else 'Шапка не установлена'
-                        }
-                    })
-                else:
-                    return Response({
-                        'status': 'ERR',
-                        'data': {
-                            'message': 'Обьекта не существует.'
-                        }
-                    })
+        if 'token' in request.GET:
+            if CustomUser.objects.filter(API_TOKEN=request.GET['token']):
+                user = CustomUser.objects.get(API_TOKEN=request.GET['token'])
 
-            elif method == 'getUserSubscribers':
-                if CustomUser.objects.filter(username=request.GET['user_id']):
-                    user = CustomUser.objects.get(username=request.GET['user_id'])
+                if 'method' in request.GET:
+                    method = request.GET['method']
+                    if method == 'getUserInfo':
+                        if CustomUser.objects.filter(username=request.GET['user_id']):
+                            user = CustomUser.objects.get(username=request.GET['user_id'])
+                            return Response({
+                                'status': 'OK',
+                                'data': {
+                                    'id': user.username,
+                                    'full_name': user.full_name,
+                                    'description': user.description,
+                                    'avatar': user.avatar.url if user.avatar.url else 'Фото профиля не установлено',
+                                    'cap': user.cap.url if user.cap else 'Шапка не установлена'
+                                }
+                            })
+                        else:
+                            return Response({
+                                'status': 'ERR',
+                                'data': {
+                                    'message': 'Объекта не существует.'
+                                }
+                            })
 
-                    subscribers = []
+                    elif method == 'getUserSubscribers':
+                        if CustomUser.objects.filter(username=request.GET['user_id']):
+                            user = CustomUser.objects.get(username=request.GET['user_id'])
 
-                    for i in user.subscribers.all():
-                        subscribers.append(
-                            {
-                                'id': i.username,
-                                'full_name': i.full_name
+                            subscribers = []
+
+                            for i in user.subscribers.all():
+                                subscribers.append(
+                                    {
+                                        'id': i.username,
+                                        'full_name': i.full_name
+                                    }
+                                )
+
+                            return Response({
+                                'status': 'OK',
+                                'data': {
+                                    'count': len(subscribers),
+                                    'subscribers': subscribers
+                                }
+                            })
+                        else:
+                            return Response({
+                                'status': 'ERR',
+                                'data': {
+                                    'message': 'Объекта не существует.'
+                                }
+                            })
+
+                    elif method == 'getPinInfo':
+                        if Pin.objects.filter(id=request.GET['pin_id']):
+                            pin = Pin.objects.get(id=request.GET['pin_id'])
+
+                            return Response({
+                                'status': 'OK',
+                                'data': {
+                                    'pin_id': pin.id,
+                                    'owner_id': pin.owner.username,
+                                    'title': pin.title,
+                                    'description': pin.description,
+                                    'image': pin.image.url,
+                                }
+                            })
+                        else:
+                            return Response({
+                                'status': 'ERR',
+                                'data': {
+                                    'message': 'Объекта не существует.'
+                                }
+                            })
+
+                    elif method == 'getPinComments':
+                        if Pin.objects.filter(id=request.GET['pin_id']):
+                            pin = Pin.objects.get(id=request.GET['pin_id'])
+                            comments = Comment.objects.filter(pin=pin)
+
+                            comments_list = []
+
+                            for i in comments:
+                                comments_list.append(
+                                    {
+                                        'id': i.id,
+                                        'owner_id': i.owner.username,
+                                        'text': i.text,
+                                        'date_of_creation': i.date_of_creation
+                                    }
+                                )
+
+                            return Response({
+                                'status': 'OK',
+                                'data': {
+                                    'count': len(comments_list),
+                                    'subscribers': comments_list
+                                }
+                            })
+                        else:
+                            return Response({
+                                'status': 'ERR',
+                                'data': {
+                                    'message': 'Объекта не существует.'
+                                }
+                            })
+
+                    elif method == 'getCommentInfo':
+                        if Comment.objects.filter(id=request.GET['comment_id']):
+                            comment = Comment.objects.get(id=request.GET['comment_id'])
+
+                            return Response({
+                                'status': 'OK',
+                                'data': {
+                                    'id': comment.id,
+                                    'owner_id': comment.owner.username,
+                                    'pin_id': comment.pin.id,
+                                    'text': comment.text,
+                                    'date_of_creation': comment.date_of_creation
+                                }
+                            })
+                        else:
+                            return Response({
+                                'status': 'ERR',
+                                'data': {
+                                    'message': 'Объекта не существует.'
+                                }
+                            })
+
+                    elif method == 'getUserPins':
+                        if CustomUser.objects.filter(username=request.GET['user_id']):
+                            user = CustomUser.objects.get(username=request.GET['user_id'])
+
+                            pins = Pin.objects.filter(owner=user)
+                            pins_list = []
+
+                            for i in pins:
+                                pins_list.append(
+                                    {
+                                        'id': i.id,
+                                        'title': i.title
+                                    }
+                                )
+
+                            return Response({
+                                'status': 'OK',
+                                'data': {
+                                    'count': len(pins_list),
+                                    'boards': pins_list
+                                }
+                            })
+                        else:
+                            return Response({
+                                'status': 'ERR',
+                                'data': {
+                                    'message': 'Объекта не существует.'
+                                }
+                            })
+
+                    #   CHAT API
+
+                    elif method == 'deleteMessage':
+                        if Message.objects.filter(id=request.GET['message_id']):
+                            message = Message.objects.get(id=request.GET['message_id'])
+
+                            print(message.owner, user)
+
+                            if message.owner == user:
+                                message.delete()
+
+                                return Response({
+                                    'status': 'OK',
+                                    'data': {
+
+                                    }
+                                })
+
+                            else:
+                                return Response({
+                                    'status': 'ERR',
+                                    'data': {
+                                        'message': 'Сообщение не пренадлежит вам.'
+                                    }
+                                })
+                        else:
+                            return Response({
+                                'status': 'ERR',
+                                'data': {
+                                    'message': 'Объекта не существует.'
+                                }
+                            })
+
+                    elif method == 'sendMessage':
+                        if 'pin_id' in request.GET:
+                            message = PinMessage()
+                            if Pin.objects.filter(id=request.GET['pin_id']):
+                                message.pin = Pin.objects.get(id=request.GET['pin_id'])
+                            else:
+                                return Response({
+                                    'status': 'ERR',
+                                    'data': {
+                                        'message': 'Объект не существует.'
+                                    }
+                                })
+                        else:
+                            if 'text' in request.GET:
+                                message = Message()
+                                message.text = request.GET['text']
+                            else:
+                                return Response({
+                                    'status': 'ERR',
+                                    'data': {
+                                        'message': 'Не переданы некоторые параметры.'
+                                    }
+                                })
+
+                        message.owner = user
+                        message.save()
+
+                        return Response({
+                            'status': 'OK',
+                            'data': {
+                                'id': message.id,
+                                'owner_id': message.owner.id,
+                                'text': message.text,
                             }
-                        )
+                        })
 
-                    return Response({
-                        'status': 'OK',
-                        'data': {
-                            'count': len(subscribers),
-                            'subscribers': subscribers
-                        }
-                    })
-                else:
-                    return Response({
-                        'status': 'ERR',
-                        'data': {
-                            'message': 'Обьекта не существует.'
-                        }
-                    })
 
-            elif method == 'getPinInfo':
-                if Pin.objects.filter(id=request.GET['pin_id']):
-                    pin = Pin.objects.get(id=request.GET['pin_id'])
+                    elif method == 'chatListen':
+                        message = Message.objects.all()[::-1][0]
 
-                    return Response({
-                        'status': 'OK',
-                        'data': {
-                            'pin_id': pin.id,
-                            'owner_id': pin.owner.username,
-                            'title': pin.title,
-                            'description': pin.description,
-                            'image': pin.image.url,
-                        }
-                    })
-                else:
-                    return Response({
-                        'status': 'ERR',
-                        'data': {
-                            'message': 'Обьекта не существует.'
-                        }
-                    })
-
-            elif method == 'getPinComments':
-                if Pin.objects.filter(id=request.GET['pin_id']):
-                    pin = Pin.objects.get(id=request.GET['pin_id'])
-                    comments = Comment.objects.filter(pin=pin)
-
-                    comments_list = []
-
-                    for i in comments:
-                        comments_list.append(
-                            {
-                                'id': i.id,
-                                'owner_id': i.owner.username,
-                                'text': i.text,
-                                'date_of_creation': i.date_of_creation
+                        if PinMessage.objects.filter(id=message.id):
+                            message = PinMessage.objects.get(id=message.id)
+                            return Response({
+                                'status': 'OK',
+                                'data': {
+                                    'id': message.id,
+                                    'owner_id': message.owner.id,
+                                    'text': message.text,
+                                    'date_of_creation': str(message.date_of_creation).split('.')[0][:-3],
+                                    'pin': {
+                                        'id': message.pin.id
+                                    }
+                                }
+                            })
+                        return Response({
+                            'status': 'OK',
+                            'data': {
+                                'id': message.id,
+                                'owner_id': message.owner.id,
+                                'text': message.text,
+                                'date_of_creation': str(message.date_of_creation).split('.')[0][:-3]
                             }
-                        )
+                        })
 
-                    return Response({
-                        'status': 'OK',
-                        'data': {
-                            'count': len(comments_list),
-                            'subscribers': comments_list
-                        }
-                    })
-                else:
-                    return Response({
-                        'status': 'ERR',
-                        'data': {
-                            'message': 'Обьекта не существует.'
-                        }
-                    })
-
-            elif method == 'getCommentInfo':
-                if Comment.objects.filter(id=request.GET['comment_id']):
-                    comment = Comment.objects.get(id=request.GET['comment_id'])
-
-                    return Response({
-                        'status': 'OK',
-                        'data': {
-                            'id': comment.id,
-                            'owner_id': comment.owner.username,
-                            'pin_id': comment.pin.id,
-                            'text': comment.text,
-                            'date_of_creation': comment.date_of_creation
-                        }
-                    })
-                else:
-                    return Response({
-                        'status': 'ERR',
-                        'data': {
-                            'message': 'Обьекта не существует.'
-                        }
-                    })
-
-            elif method == 'getUserBoards':
-                if CustomUser.objects.filter(username=request.GET['user_id']):
-                    user = CustomUser.objects.get(username=request.GET['user_id'])
-
-                    boards = Board.objects.filter(owner=user)
-                    boards_list = []
-
-                    for i in boards:
-                        boards_list.append(
-                            {
-                                'id': i.id,
-                                'name': i.name
+                    else:
+                        return Response({
+                            'status': 'ERR',
+                            'data': {
+                                'message': 'Метода не существует.'
                             }
-                        )
+                        })
 
-                    return Response({
-                        'status': 'OK',
-                        'data': {
-                            'count': len(boards_list),
-                            'boards': boards_list
-                        }
-                    })
                 else:
                     return Response({
                         'status': 'ERR',
                         'data': {
-                            'message': 'Обьекта не существует.'
+                            'message': ' Не передан параметр: method'
                         }
                     })
-
-            elif method == 'getUserPins':
-                if CustomUser.objects.filter(username=request.GET['user_id']):
-                    user = CustomUser.objects.get(username=request.GET['user_id'])
-
-                    pins = Pin.objects.filter(owner=user)
-                    pins_list = []
-
-                    for i in pins:
-                        pins_list.append(
-                            {
-                                'id': i.id,
-                                'title': i.title
-                            }
-                        )
-
-                    return Response({
-                        'status': 'OK',
-                        'data': {
-                            'count': len(pins_list),
-                            'boards': pins_list
-                        }
-                    })
-                else:
-                    return Response({
-                        'status': 'ERR',
-                        'data': {
-                            'message': 'Обьекта не существует.'
-                        }
-                    })
-
             else:
                 return Response({
                     'status': 'ERR',
                     'data': {
-                        'message': 'Метода не существует.'
+                        'message': 'Неверный параметр: token.'
                     }
                 })
         else:
             return Response({
                 'status': 'ERR',
                 'data': {
-                    'message': ' Не передан параметр: method'
+                    'message': ' Не передан параметр: token'
                 }
             })

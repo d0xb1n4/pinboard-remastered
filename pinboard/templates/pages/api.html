@@ -10,8 +10,19 @@
 <div class="api">
     <p>Ссылка для работы с API: <span class="red">/api/general/</span></p>
     <p>Пример обращения к API:</p>
-    <a href="http://127.0.0.1:8000/api/general/?method=getPinInfo&pin_id=1">http://127.0.0.1:8000/api/general/?method=getPinInfo&pin_id=1</a>
-    <p>Каждый из методов API обязательно принимает параметр method.</p>
+    <a target="_blank" href="http://127.0.0.1:8000/api/general/?method=getPinInfo&pin_id=6&token=adminlYlItXW5fnyBOxeSoPKX">http://127.0.0.1:8000/api/general/?method=getPinInfo&pin_id=6&token=adminlYlItXW5fnyBOxeSoPKX</a>
+    <p>Каждый из методов API обязательно принимает параметр method и token.</p>
+
+    <center>
+        <h1>Получение токена</h1>
+    </center>
+
+    <p class="text">
+        Чтобы получить токен вам нужно нажать кнопку ниже:<br><br>
+        <button onclick="SetToken('{{ request.user.username }}');">получить</button>
+        <input id="token" placeholder="Тут будет ваш токен..." disabled>
+        <button id="copy-token" onclick="CopyToken();">копировать</button>
+    </p>
 
     <center>
         <h1>Методы</h1>
@@ -50,6 +61,21 @@
                 <td>getUserPins</td>
                 <td>Позволяет получить <br>пины пользователя<br></td>
                 <td>user_id</td>
+            </tr>
+            <tr>
+                <td>sendMessage</td>
+                <td>Позволяет отправить <br>сообщение в общий<br>чат</td>
+                <td>text (если есть pin_id<br> - не нужно), pin_id (если<br> нужно отправить пин)</td>
+            </tr>
+            <tr>
+                <td>deleteMessage</td>
+                <td>Позволяет удалить <br>сообщение из чата<br></td>
+                <td>message_id</td>
+            </tr>
+            <tr>
+                <td>chatListen</td>
+                <td>Позволяет получить <br>последнее сообщение<br> из чата<br></td>
+                <td>. . .</td>
             </tr>
         </table>
     </center>

@@ -72,6 +72,9 @@ class BoardBuilderView(TemplateView):
     template_name = 'board/board-builder.html'
 
 
+from django.db.models import Q
+
+
 class SearchView(TemplateView):
     template_name = 'pages/search.html'
 
@@ -79,7 +82,7 @@ class SearchView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         if 'q' in self.request.GET:
-            context['pins'] = Pin.objects.filter(title__icontains=self.request.GET['q'])
+            context['pins'] = Pin.objects.filter(Q(title__contains=self.request.GET['q']) | Q(description__contains=self.request.GET['q']))
 
         return context
 

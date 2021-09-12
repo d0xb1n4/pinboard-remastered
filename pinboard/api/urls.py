@@ -40,6 +40,14 @@ urlpatterns = [
 
     path('api/newPassword/', NewPassword.as_view(), name='check__user__password'),
 
+    path('api/sendMessage/', SendMessage.as_view(), name='send__message'),
+    path('api/updateMessages/', UpdateMessages.as_view(), name='update__messages'),
+    path('api/deleteMessage/', DeleteMessage.as_view(), name='delete__message'),
+
+    path('api/setToken/', SetToken.as_view(), name='set__token'),
+
+    path('api/getUserBoards/', GetUserBoards.as_view(), name='get__user__boards'),
+
     # views
     path('', MainView.as_view(), name='main'),
     path('user/<str:username>/', AccountView.as_view(), name='account'),

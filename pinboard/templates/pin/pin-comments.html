@@ -36,7 +36,7 @@
                 <button onclick="LikeCheck('{{ request.user.username }}', {{ pin.id }}, true);" id="likes">🤍 0</button>
                 <button><span style="color: gray;">👁</span> {{ pin.views }}</button>
                 <button>💬 {{ comments|length }}</button>
-                <button>⭐</button>
+                <button onclick="SendMessage('{{ request.user.username }}', {{ pin.id }});">📤 </button>
             </div>
         {% endif %}
         <br>
@@ -62,7 +62,9 @@
                         <div class="text" style="word-break: break-word;">
                             <h2>{{ comment.text }}</h2>
                             <p>{{ comment.date_of_creation }}</p>
+                            {% if request.user == comment.owner %}
                             <button onclick="DeleteComment({{ comment.id }});" style="font-size: 15px; margin-top: -10px;">удалить 🗑</button>
+                            {% endif %}
                         </div>
                     </div>
                     <br>

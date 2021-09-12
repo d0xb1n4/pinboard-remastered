@@ -10,10 +10,13 @@
             </span>
             <span class="opacity">
                 <span style="position:absolute; margin-left: 15px; margin-top: 20px;">
-                    {% if pin.owner == request.user %}
-                    <button id="likes{{ pin.id }}" onclick="LikeCheck('{{ request.user.username }}', {{ pin.id }}, true);">🤍</button>
-                    <button onclick="PinAddToBoardHtml('{{ request.user.username }}', {{ pin.id }});" id="save">Сохранить</button>
+
+                   {% if request.user.is_authenticated %}
+                         <button id="likes{{ pin.id }}" onclick="LikeCheck('{{ request.user.username }}', {{ pin.id }}, true);">🤍</button>
+                        <button onclick="PinAddToBoardHtml('{{ request.user.username }}', {{ pin.id }});" id="save">Сохранить</button><br>
+                        <button onclick="SendMessage('{{ request.user.username }}', {{ pin.id }});">📤 Поделиться</button>
                     {% endif %}
+                    
                 </span>
                 <span style="margin-left: 15px; position:absolute; margin-top: 200px;">
                     {% if pin.owner == request.user %}

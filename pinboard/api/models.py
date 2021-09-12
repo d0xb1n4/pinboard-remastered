@@ -11,18 +11,20 @@ class CustomUser(AbstractUser):
 
     code = models.CharField(max_length=6, default=0, blank=True)
 
-    avatar = models.ImageField(upload_to='images/')
-    cap = models.ImageField(upload_to='images/')
+    avatar = models.ImageField(upload_to='images/', blank=False)
+    cap = models.ImageField(upload_to='images/', blank=False)
 
     description = models.TextField(default='Нет описания пользователя.')
     two_factor = models.BooleanField(default=False)
 
-    subscribers = models.ManyToManyField('self', related_name='followers')
-    subscriptions = models.ManyToManyField('self', related_name='followers')
+    subscribers = models.ManyToManyField('self', related_name='followers', blank=False)
+    subscriptions = models.ManyToManyField('self', related_name='followers', blank=False)
 
     newbie = models.BooleanField(default=True)
 
     date_of_creation = models.DateTimeField(auto_now=True)
+
+    API_TOKEN = models.TextField(blank=False)
 
     @staticmethod
     def generate_auth_code():
@@ -74,3 +76,13 @@ class Comment(models.Model):
     pin = models.ForeignKey(Pin, on_delete=models.CASCADE)
 
     date_of_creation = models.DateTimeField(auto_now=True)
+
+
+class Message(models.Model):
+    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    text = models.TextField()
+    date_of_creation = models.TimeField(auto_now=True)
+
+
+class PinMessage(Message):
+    pin = models.ForeignKey(Pin, on_delete=models.CASCADE)
