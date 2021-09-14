@@ -3,6 +3,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
@@ -55,7 +56,9 @@
             <h1>Подтвердите код</h1>
 
             <p>Он отправлен на вашу почту.</p>
-            <input type="number" id="code-input" placeholder="Код">
+            <form>
+                <input type="number" id="code-input" placeholder="Код">
+            </form>
             <br><br><br>
             <button onclick="CheckAuthCode('{{ request.user.username }}');">Зарегистрироваться</button>
             <br><br>
@@ -79,16 +82,12 @@
     </center>
     <br><br><br><br>
     <div class="inp-message">
-        <input id="inp-text" placeholder="Сообщение...">
-        <button onclick="SendMessage('{{ request.user.username }}');">></button>
+        <form>
+            <input id="inp-text" placeholder="Сообщение...">
+        </form>
+        <button id="inp-button" onclick="SendMessage('{{ request.user.username }}');">></button>
     </div>
     <div id="messages">
-        <h1>Empty chat</h1>
-        </h1>
-        <div class="container">
-            <a href="/user/' + res['data']['messages'][i]['owner_id'] + '/">user</a>
-            <p>text</p>
-            <span class="time-left">11:45</div>
     </div>
 </div>
 
@@ -98,8 +97,9 @@
     </a>
     <center>
         <h1>Выберите доску:</h1>
-        <select id="boards-addpin">
-        </select>
+       <form>
+            <select id="boards-addpin"></select>
+       </form>
         <button onclick="PinAddToBoard();">Сохранить</button>
     </center>
 </div>
@@ -124,10 +124,12 @@
             <br>
             <h1>Вход в аккаунт</h1>
             <br>
-            <input placeholder="Эл. почта" id="signin-email">
-            <br><br><br>
-            <input placeholder="Пароль" type="password" id="signin-password">
-            <br><br><br>
+            <form>
+                <input placeholder="Эл. почта" id="signin-email">
+                <br><br><br>
+                <input placeholder="Пароль" type="password" id="signin-password">
+                <br><br><br>
+            </form>
             <button onclick="SignIn();">Авторизоваться</button>
             <br><br>
             <a href="#" onclick="SignUpHtml();">
@@ -141,14 +143,16 @@
             <br>
             <h1>Регистрация</h1>
             <br>
-            <input placeholder="Ник или ваше имя" maxlength="20" id="signup-fullname">
-            <br><br><br>
-            <input placeholder="Эл. почта" id="signup-email">
-            <br><br><br>
-            <input placeholder="Пароль" type="password" id="signup-password">
-            <br><br><br>
-            <input placeholder="Пароль (повторно)" type="password" id="signup-password1">
-            <br><br><br>
+            <form>
+                <input placeholder="Ник или ваше имя" maxlength="20" id="signup-fullname">
+                <br><br><br>
+                <input placeholder="Эл. почта" id="signup-email">
+                <br><br><br>
+                <input placeholder="Пароль" type="password" id="signup-password">
+                <br><br><br>
+                <input placeholder="Пароль (повторно)" type="password" id="signup-password1">
+                <br><br><br>
+            </form>
             <button onclick="SignUp()">далее</button>
             <br><br>
             <a href="#" onclick="SignInHtml();">
@@ -160,7 +164,8 @@
 {% endif %}
 {% endif %}
 <script>
-    window.onload = SetUserId({{request.user.id}})
+    window.onload = SetUser({{request.user.id}}, '{{ request.user.API_TOKEN }}')
+    SetOnline()
 </script>
 </body>
 </html>

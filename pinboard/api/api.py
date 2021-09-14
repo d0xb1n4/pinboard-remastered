@@ -9,7 +9,23 @@ from .models import *
 from .config import *
 
 
-class SignUp(APIView):
+class CustomAPIView(APIView):
+    def get(self, request):
+        user = CustomUser.objects.get(id=request.user.id)
+        user.last_online = timezone.now()
+        user.save()
+
+class DeleteAccount(CustomAPIView):
+    def post(self, request):
+        user = CustomUser.objects.get(id=request.data['user_id'])
+        user.delete()
+
+        return Response({
+            'status': 'OK',
+            'data': {}
+        }, status=status.HTTP_200_OK)
+
+class SignUp(CustomAPIView):
     def post(self, request):
         try:
             if not CustomUser.objects.filter(email=request.data['email']):
@@ -21,6 +37,7 @@ class SignUp(APIView):
                 user.full_name = request.data['full_name']
                 user.save()
                 user.username = 'id' + '000000000' + str(user.id)
+                user.API_TOKEN = create_token(user.username)
                 user.save()
 
                 msg = MIMEMultipart()
@@ -58,7 +75,7 @@ class SignUp(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CheckAuthCode(APIView):
+class CheckAuthCode(CustomAPIView):
     def post(self, request):
         if CustomUser.objects.filter(username=request.data['username']):
             user = CustomUser.objects.get(username=request.data['username'])
@@ -93,13 +110,13 @@ class CheckAuthCode(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CancelSignUp(APIView):
+class CancelSignUp(CustomAPIView):
     def post(self, request):
         user = CustomUser.objects.get(id=request.data['user_id'])
         user.delete()
 
 
-class SignIn(APIView):
+class SignIn(CustomAPIView):
     def post(self, request):
         try:
             if CustomUser.objects.filter(email=request.data['email']):
@@ -166,7 +183,7 @@ class SignIn(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class SignOut(APIView):
+class SignOut(CustomAPIView):
     def post(self, request):
         logout(request)
         return Response({
@@ -177,7 +194,7 @@ class SignOut(APIView):
         }, status=status.HTTP_200_OK)
 
 
-class EditAccount(APIView):
+class EditAccount(CustomAPIView):
     def post(self, request):
         user = CustomUser.objects.get(id=int(request.data['user_id'][0]))
         data = request.data
@@ -200,11 +217,13 @@ class EditAccount(APIView):
             if data['full_name'][0]:
                 user.full_name = data['full_name']
 
-            if data['description'][0]:
-                user.description = data['description']
+            try:
+                user.description = data['description'][0]
+            except:
+                user.description = 'Нет описания пользователя.'
 
-            if data['two_factor'][0] != 'undefined':
-                if data['two_factor'][0] is False:
+            if data['two_factor'] != 'undefined':
+                if data['two_factor'] is False:
                     user.code = '0'
 
                 user.two_factor = data['two_factor'][0]
@@ -219,7 +238,7 @@ class EditAccount(APIView):
         }, status=status.HTTP_200_OK)
 
 
-class CreatePin(APIView):
+class CreatePin(CustomAPIView):
     def post(self, request):
         try:
             pin = Pin()
@@ -247,7 +266,7 @@ class CreatePin(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class EditPin(APIView):
+class EditPin(CustomAPIView):
     def post(self, request):
         try:
             pin = Pin.objects.get(id=request.data['pin_id'])
@@ -277,7 +296,7 @@ class EditPin(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class LikeCheck(APIView):
+class LikeCheck(CustomAPIView):
     def post(self, request):
         pin = Pin.objects.get(id=request.data['pin_id'])
         owner = CustomUser.objects.get(username=request.data['username'])
@@ -304,7 +323,7 @@ class LikeCheck(APIView):
         }, status=status.HTTP_200_OK)
 
 
-class CreateComment(APIView):
+class CreateComment(CustomAPIView):
     def post(self, request):
         pin = Pin.objects.get(id=request.data['pin_id'])
         owner = CustomUser.objects.get(username=request.data['username'])
@@ -325,7 +344,7 @@ class CreateComment(APIView):
         }, status=status.HTTP_200_OK)
 
 
-class DeleteComment(APIView):
+class DeleteComment(CustomAPIView):
     def post(self, requests):
         comment = Comment.objects.get(id=requests.data['comment_id'])
         comment.delete()
@@ -341,7 +360,7 @@ class DeleteComment(APIView):
         })
 
 
-class Subscribe(APIView):
+class Subscribe(CustomAPIView):
     def post(self, request):
         from_ = CustomUser.objects.get(username=request.data['from_username'])
         to_ = CustomUser.objects.get(username=request.data['to_username'])
@@ -369,7 +388,7 @@ class Subscribe(APIView):
         }, status=status.HTTP_200_OK)
 
 
-class CreateBoard(APIView):
+class CreateBoard(CustomAPIView):
     def post(self, request):
         board = Board()
         board.owner = CustomUser.objects.get(username=request.data['owner_id'])
@@ -389,7 +408,7 @@ class CreateBoard(APIView):
         }, status=status.HTTP_200_OK)
 
 
-class DeleteBoard(APIView):
+class DeleteBoard(CustomAPIView):
     def post(self, request):
         board = Board.objects.get(id=request.data['board_id'])
         board.delete()
@@ -402,7 +421,7 @@ class DeleteBoard(APIView):
         }, status=status.HTTP_200_OK)
 
 
-class DeletePin(APIView):
+class DeletePin(CustomAPIView):
     def post(self, request):
         if Pin.objects.get(id=request.data['pin_id']):
             pin = Pin.objects.get(id=request.data['pin_id'])
@@ -426,7 +445,7 @@ class DeletePin(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class PinAddToBoard(APIView):
+class PinAddToBoard(CustomAPIView):
     def post(self, request):
         board = Board.objects.get(id=int(request.data['board_id']))
         pin = Pin.objects.get(id=int(request.data['pin_id']))
@@ -440,7 +459,7 @@ class PinAddToBoard(APIView):
         }, status=status.HTTP_200_OK)
 
 
-class PinDeleteToBoard(APIView):
+class PinDeleteToBoard(CustomAPIView):
     def post(self, request):
         board = Board.objects.get(id=int(request.data['board_id']))
         pin = Pin.objects.get(id=int(request.data['pin_id']))
@@ -454,7 +473,7 @@ class PinDeleteToBoard(APIView):
         }, status=status.HTTP_200_OK)
 
 
-class NewPassword(APIView):
+class NewPassword(CustomAPIView):
     def post(self, request):
         user = CustomUser.objects.get(id=request.data['user_id'])
 
@@ -478,7 +497,7 @@ class NewPassword(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UpdateMessages(APIView):
+class UpdateMessages(CustomAPIView):
     def post(self, request):
         try:
             messages = []
@@ -523,7 +542,7 @@ class UpdateMessages(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class DeleteMessage(APIView):
+class DeleteMessage(CustomAPIView):
     def post(self, request):
         message = Message.objects.get(id=request.data['message_id'])
         message.delete()
@@ -536,7 +555,7 @@ class DeleteMessage(APIView):
         }, status=status.HTTP_200_OK)
 
 
-class SendMessage(APIView):
+class SendMessage(CustomAPIView):
     def post(self, request):
         if 'pin_id' in request.data:
             message = PinMessage()
@@ -558,7 +577,11 @@ class SendMessage(APIView):
         else:
             message = Message()
             message.text = request.data['text']
-            message.owner = CustomUser.objects.get(username=request.data['owner_id'])
+            if CustomUser.objects.filter(username=request.data['owner_id']):
+                message.owner = CustomUser.objects.get(username=request.data['owner_id'])
+            else:
+                message.owner = CustomUser.objects.get(id=int(request.data['owner_id']))
+
             message.save()
 
             return Response({
@@ -571,6 +594,20 @@ class SendMessage(APIView):
             }, status=status.HTTP_200_OK)
 
 
+class EditMessage(CustomAPIView):
+    def post(self, request):
+        message = Message.objects.get(id=request.data['message_id'])
+        message.text = request.data['text']
+        message.save()
+
+        return Response({
+            'status': 'OK',
+            'data': {
+
+            }
+        }, status=status.HTTP_200_OK)
+
+
 letters = 'abcdefghijklmnopqrstuvwxyz123456789QWERTYUIOPASDFGHJKLZXCVBNMM'
 
 
@@ -579,7 +616,7 @@ def create_token(user_id):
     return token
 
 
-class SetToken(APIView):
+class SetToken(CustomAPIView):
     def post(self, request):
         if 'owner_id' in request.data:
             owner = CustomUser.objects.get(username=request.data['owner_id'])
@@ -622,7 +659,7 @@ class SetToken(APIView):
             })
 
 
-class GetUserBoards(APIView):
+class GetUserBoards(CustomAPIView):
     def get(self, request):
         if CustomUser.objects.filter(username=request.GET['user_id']):
             user = CustomUser.objects.get(username=request.GET['user_id'])
@@ -654,7 +691,7 @@ class GetUserBoards(APIView):
             })
 
 
-class GeneralApi(APIView):
+class GeneralApi(CustomAPIView):
     def get(self, request):
         if 'token' in request.GET:
             if CustomUser.objects.filter(API_TOKEN=request.GET['token']):
@@ -682,6 +719,17 @@ class GeneralApi(APIView):
                                     'message': 'Объекта не существует.'
                                 }
                             })
+
+                    elif method == 'setOnline':
+                        user.last_online = timezone.now()
+                        user.save()
+
+                        return Response({
+                            'status': 'OK',
+                            'data': {
+                                'message': 'Статус "онлайн" устанолвен на 5 минут.'
+                            }
+                        })
 
                     elif method == 'getUserSubscribers':
                         if CustomUser.objects.filter(username=request.GET['user_id']):

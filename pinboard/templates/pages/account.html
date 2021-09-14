@@ -53,9 +53,10 @@
         {% endif %}
 
         <div class="profile" style="word-wrap: break-word; background: white;">
-            <h1 class="username">{{ user.full_name }}</h1><br>
+            <h1 class="username">{{ user.full_name }}</h1>
+            <h2>{{ user.get_online_info }}</h2>
             {% if user == request.user %}
-            <h2 class="email">{{ user.email }}</h2><br>
+            <h2 class="email">{{ user.email }}</h2>
             {% endif %}
             <h2 class="description">{{ user.description }}</h2>
 
@@ -208,6 +209,37 @@
             Сохранить пароль
         </button>
     </center>
+
+    <style>
+        dialog::backdrop {
+          background-color: rgba(0, 0, 0, 0.8);
+        }
+    </style>
+
+    <dialog>
+      <p>Удаление аккаунта сопровождается удалением всей информации: </p>
+        <ul>
+            <li>Пинов и досок</li>
+            <li>Ваших комментариев</li>
+            <li>Ваших сообщений</li>
+            <li>Полное удаление вашего профиля</li>
+        </ul>
+        <p>Вы согласны?</p>
+      <button id="close">Отмена</button>
+        <button id="close" onclick="DeleteAccount();">Да, удалить профиль</button>
+    </dialog>
+    <a href="#" id="show">удалить аккаунт</a>
+
+    <script type = text/javascript>
+        var dialog = document.querySelector('dialog');
+        document.querySelector('#show').onclick = function() {
+          dialog.showModal();
+        };
+        document.querySelector('#close').onclick = function() {
+          dialog.close();
+        };
+
+    </script>
 </div>
 
 {% endblock %}

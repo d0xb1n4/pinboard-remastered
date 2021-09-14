@@ -43,6 +43,9 @@ urlpatterns = [
     path('api/sendMessage/', SendMessage.as_view(), name='send__message'),
     path('api/updateMessages/', UpdateMessages.as_view(), name='update__messages'),
     path('api/deleteMessage/', DeleteMessage.as_view(), name='delete__message'),
+    path('api/editMessage/', EditMessage.as_view(), name='edit__message'),
+
+    path('api/deleteAccount/', DeleteAccount.as_view(), name='delete__account'),
 
     path('api/setToken/', SetToken.as_view(), name='set__token'),
 

@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.humanize.templatetags.humanize import naturaltime
+from django.utils import timezone
 import random
 
 
@@ -22,9 +24,24 @@ class CustomUser(AbstractUser):
 
     newbie = models.BooleanField(default=True)
 
+    last_online = models.DateTimeField(blank=True, null=True)
+
     date_of_creation = models.DateTimeField(auto_now=True)
 
     API_TOKEN = models.TextField(blank=False)
+
+    def get_online(self):
+        if self.last_online:
+            return (timezone.now() - self.last_online) < timezone.timedelta(minutes=1)
+        return False
+
+    def get_online_info(self):
+        if self.get_online():
+            return '🌍 В сети'
+        if self.last_online:
+            print(self.last_online)
+            return '❌ Был в ' + self.last_online.strftime("%H:%M")
+        return '❌ Не в сети'
 
     @staticmethod
     def generate_auth_code():
